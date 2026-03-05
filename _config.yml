@@ -1,7 +1,7 @@
 title: Jelly2 Blog
 description: Short posts from one JSON file
-url: "https://YOUR_GITHUB_USERNAME.github.io"
-baseurl: ""
+url: "https://diffw.github.io"
+baseurl: "/diff-im-en"
 lang: zh-CN
 timezone: Asia/Shanghai
 
