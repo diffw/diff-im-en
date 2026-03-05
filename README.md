@@ -45,3 +45,37 @@ npx vitest run
 1. Update `url` in `_config.yml` to your domain (for example `https://<username>.github.io`).
 2. Push to the `main` branch of your GitHub repository.
 3. In repository `Settings -> Pages`, set Source to `GitHub Actions`.
+
+## Post from Telegram (Auto)
+
+This repo supports automatic posting from Telegram every few minutes.
+
+### 1) Create bot secrets in GitHub
+
+In `Settings -> Secrets and variables -> Actions`, add:
+
+- `TELEGRAM_BOT_TOKEN`: your BotFather token
+- `TELEGRAM_ALLOWED_CHAT_ID`: your personal chat ID (only this chat can publish)
+
+### 2) Message format
+
+Send a plain text Telegram message in this exact structure:
+
+```text
+# Title
+#tag1, #tag2
+Post content lines...
+```
+
+Rules:
+
+- First line must start with `#` and becomes `title`.
+- Second line must contain hashtags (comma-separated is supported).
+- Third line and below become `content`.
+
+### 3) How publishing works
+
+- Workflow file: `.github/workflows/telegram-publish.yml`
+- Runs every 5 minutes (and supports manual dispatch).
+- Reads Telegram updates, appends new entries into `_data/posts.json`.
+- Commits updates automatically to `main`, which triggers Pages deployment.

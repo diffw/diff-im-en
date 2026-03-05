@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "telegram:sync": "node scripts/telegram-to-posts.mjs"
   },
   "devDependencies": {
     "jsdom": "^26.1.0",

@@ -1,0 +1,44 @@
+name: Telegram Auto Publish
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: telegram-auto-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Pull Telegram updates into posts.json
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ALLOWED_CHAT_ID: ${{ secrets.TELEGRAM_ALLOWED_CHAT_ID }}
+        run: node scripts/telegram-to-posts.mjs
+
+      - name: Commit and push changes
+        run: |
+          if [ -z "$(git status --porcelain _data/posts.json .bot-state/telegram-offset.json)" ]; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git add _data/posts.json .bot-state/telegram-offset.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Auto publish posts from Telegram"
+          git push origin HEAD:main
