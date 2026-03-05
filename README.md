@@ -59,7 +59,7 @@ In `Settings -> Secrets and variables -> Actions`, add:
 
 ### 2) Message format
 
-Send a plain text Telegram message in this exact structure:
+Telegram now supports flexible plain-text input:
 
 ```text
 # Title
@@ -69,9 +69,10 @@ Post content lines...
 
 Rules:
 
-- First line must start with `#` and becomes `title`.
-- Second line must contain hashtags (comma-separated is supported).
-- Third line and below become `content`.
+- `title` is optional. If omitted, no title is shown on the page.
+- `tags` are optional. No tags line means no tags shown. One tag is also supported.
+- If you send only one plain text line, it is treated as the post content.
+- URLs in content are auto-converted into clickable links.
 
 ### 3) How publishing works
 

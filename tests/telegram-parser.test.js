@@ -21,14 +21,32 @@ Second line`);
     });
   });
 
-  it("rejects malformed Telegram messages", () => {
-    expect(parseTelegramPostText("just text")).toBeNull();
+  it("supports plain text as content with optional title and tags", () => {
+    expect(parseTelegramPostText("just text")).toEqual({
+      title: "",
+      tags: [],
+      content: "just text"
+    });
+
     expect(parseTelegramPostText(`# Title
-No hashtags
-Body`)).toBeNull();
-    expect(parseTelegramPostText(`#  
-#tag
-Body`)).toBeNull();
+Body`)).toEqual({
+      title: "Title",
+      tags: [],
+      content: "Body"
+    });
+
+    expect(parseTelegramPostText(`#tag1
+Body only`)).toEqual({
+      title: "",
+      tags: ["tag1"],
+      content: "Body only"
+    });
+  });
+
+  it("rejects empty or content-less messages", () => {
+    expect(parseTelegramPostText("")).toBeNull();
+    expect(parseTelegramPostText(`# Title
+#tag1`)).toBeNull();
   });
 
   it("slugifies and deduplicates slugs", () => {
