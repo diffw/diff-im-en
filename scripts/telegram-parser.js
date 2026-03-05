@@ -3,30 +3,36 @@ export function parseTelegramPostText(text) {
     return null;
   }
 
-  const lines = text.split("\n").map((line) => line.trim());
-  const nonEmptyLines = lines.filter((line) => line.length > 0);
-  if (nonEmptyLines.length === 0) {
+  const lines = text.split("\n");
+
+  let cursor = 0;
+  while (cursor < lines.length && lines[cursor].trim().length === 0) {
+    cursor++;
+  }
+  if (cursor >= lines.length) {
     return null;
   }
 
   const isTagLine = (line) => /^\s*(#([\p{L}\p{N}_-]+))(\s*,\s*#([\p{L}\p{N}_-]+))*\s*$/u.test(line);
 
-  let cursor = 0;
   let title = "";
   let tags = [];
 
-  if (nonEmptyLines[cursor].startsWith("#") && !isTagLine(nonEmptyLines[cursor])) {
-    title = nonEmptyLines[cursor].replace(/^#+\s*/, "").trim();
+  if (lines[cursor].trim().startsWith("#") && !isTagLine(lines[cursor].trim())) {
+    title = lines[cursor].trim().replace(/^#+\s*/, "").trim();
     cursor += 1;
+    while (cursor < lines.length && lines[cursor].trim().length === 0) {
+      cursor++;
+    }
   }
 
-  if (cursor < nonEmptyLines.length && isTagLine(nonEmptyLines[cursor])) {
-    const tagMatches = [...nonEmptyLines[cursor].matchAll(/#([\p{L}\p{N}_-]+)/gu)];
+  if (cursor < lines.length && isTagLine(lines[cursor].trim())) {
+    const tagMatches = [...lines[cursor].matchAll(/#([\p{L}\p{N}_-]+)/gu)];
     tags = [...new Set(tagMatches.map((match) => match[1].toLowerCase()))];
     cursor += 1;
   }
 
-  const content = nonEmptyLines.slice(cursor).join("\n").trim();
+  const content = lines.slice(cursor).join("\n").trim();
   if (content.length === 0) {
     return null;
   }

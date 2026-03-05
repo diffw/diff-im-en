@@ -43,6 +43,14 @@ Body only`)).toEqual({
     });
   });
 
+  it("preserves line breaks in content", () => {
+    const parsed = parseTelegramPostText("First paragraph\n\nSecond paragraph\nthird line");
+    expect(parsed.content).toBe("First paragraph\n\nSecond paragraph\nthird line");
+
+    const withHeader = parseTelegramPostText("# Title\n#tag1\n\nPara one\n\nPara two");
+    expect(withHeader.content).toBe("Para one\n\nPara two");
+  });
+
   it("rejects empty or content-less messages", () => {
     expect(parseTelegramPostText("")).toBeNull();
     expect(parseTelegramPostText(`# Title
