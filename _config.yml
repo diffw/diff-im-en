@@ -1,0 +1,16 @@
+title: Jelly2 Blog
+description: Short posts from one JSON file
+url: "https://YOUR_GITHUB_USERNAME.github.io"
+baseurl: ""
+lang: zh-CN
+timezone: Asia/Shanghai
+
+markdown: kramdown
+permalink: /:slug/
+
+exclude:
+  - node_modules
+  - package-lock.json
+  - package.json
+  - vitest.config.js
+  - tests

@@ -1,0 +1,30 @@
+---
+layout: null
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>{{ site.title | xml_escape }}</title>
+    <description>{{ site.description | xml_escape }}</description>
+    <link>{{ site.url }}{{ site.baseurl }}/</link>
+    <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="{{ site.url }}{{ site.baseurl }}/feed.xml" rel="self" type="application/rss+xml" />
+    {% for day in site.data.posts %}
+      {% assign day_posts = day[1] %}
+      {% for post in day_posts %}
+        <item>
+          <title>
+            {% if post.title and post.title != "" %}
+              {{ post.title | xml_escape }}
+            {% else %}
+              {{ post.content | truncate: 24 | xml_escape }}
+            {% endif %}
+          </title>
+          <description>{{ post.content | xml_escape }}</description>
+          <pubDate>{{ post.created_at | date_to_rfc822 }}</pubDate>
+          <guid>{{ site.url }}{{ site.baseurl }}/#{{ post.slug | uri_escape }}</guid>
+          <link>{{ site.url }}{{ site.baseurl }}/#{{ post.slug | uri_escape }}</link>
+        </item>
+      {% endfor %}
+    {% endfor %}
+  </channel>
+</rss>

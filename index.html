@@ -1,0 +1,43 @@
+---
+layout: null
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ site.title }}</title>
+    <meta name="description" content="{{ site.description }}" />
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }} RSS" href="{{ '/feed.xml' | relative_url }}" />
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="page-header">
+        <h1>{{ site.title }}</h1>
+        <p>{{ site.description }}</p>
+      </header>
+
+      <section class="toolbar">
+        <label for="tag-filter">标签筛选</label>
+        <select id="tag-filter" aria-label="标签筛选">
+          <option value="all">全部</option>
+        </select>
+      </section>
+
+      <section id="timeline" class="timeline" aria-live="polite"></section>
+
+      <nav class="pagination">
+        <button id="prev-page" type="button">上一页</button>
+        <span id="page-indicator">第 1 页</span>
+        <button id="next-page" type="button">下一页</button>
+      </nav>
+    </main>
+
+    <script>
+      window.BLOG_POSTS = {{ site.data.posts | jsonify }};
+      window.BLOG_CONFIG = { pageSize: 5 };
+    </script>
+    <script type="module" src="{{ '/assets/js/main.js' | relative_url }}"></script>
+  </body>
+</html>
