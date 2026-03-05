@@ -14,12 +14,14 @@ describe("initBlog", () => {
     const rawPosts = {
       "2026-03-04": [
         { slug: "a", title: "A", content: "A1", tags: ["life"], created_at: "2026-03-04T09:10:00+08:00" },
-        { slug: "b", title: "B", content: "B1", tags: ["tech"], created_at: "2026-03-04T10:10:00+08:00" }
+        { slug: "b", title: "", content: "B1", tags: ["tech"], created_at: "2026-03-04T10:10:00+08:00" }
       ]
     };
 
     initBlog(document, rawPosts, { pageSize: 10 });
     expect(document.querySelectorAll(".post").length).toBe(2);
+    expect(document.querySelectorAll(".post h2").length).toBe(1);
+    expect(document.querySelector("#b h2")).toBeNull();
 
     const tagFilter = document.querySelector("#tag-filter");
     tagFilter.value = "life";

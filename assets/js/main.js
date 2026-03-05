@@ -30,11 +30,12 @@ export function initBlog(doc, rawPosts, config = {}) {
       article.className = "post";
       article.id = post.slug;
 
-      const title = post.title && post.title.trim() !== "" ? post.title : post.content.slice(0, 18);
+      const hasTitle = post.title && post.title.trim() !== "";
       const tags = (post.tags || []).map((tag) => `<span class="tag">#${tag}</span>`).join(" ");
+      const titleHtml = hasTitle ? `<h2>${post.title}</h2>` : "";
 
       article.innerHTML = `
-        <h2>${title}</h2>
+        ${titleHtml}
         <div class="post-meta">
           <time datetime="${post.created_at}">${new Date(post.created_at).toLocaleString("en-US")}</time>
           <span>${tags}</span>
