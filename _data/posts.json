@@ -4,23 +4,39 @@
       "slug": "today-coffee-note",
       "title": "",
       "content": "I switched beans today, and the acidity felt smoother than expected.",
-      "tags": ["life", "coffee"],
+      "tags": [
+        "life",
+        "coffee"
+      ],
       "created_at": "2026-03-04T09:10:00+08:00"
     },
     {
       "slug": "jekyll-setup-log",
       "title": "",
       "content": "Jekyll + one JSON content source, first version is live.",
-      "tags": ["tech", "Jekyll"],
+      "tags": [
+        "tech",
+        "Jekyll"
+      ],
       "created_at": "2026-03-04T13:45:00+08:00"
     }
   ],
   "2026-03-05": [
     {
+      "slug": "20260305161505-post",
+      "title": "",
+      "content": "哈哈",
+      "tags": [],
+      "created_at": "2026-03-05T16:15:05.000Z"
+    },
+    {
       "slug": "test-post-from-cursor",
       "title": "Test Post",
       "content": "This is a test post to verify the publishing pipeline from the JSON source.",
-      "tags": ["test", "release"],
+      "tags": [
+        "test",
+        "release"
+      ],
       "created_at": "2026-03-05T10:30:00+08:00"
     }
   ],
@@ -29,7 +45,9 @@
       "slug": "walk-in-the-rain",
       "title": "Walk in the Rain",
       "content": "It drizzled today, I took a short walk, and my head felt clear.",
-      "tags": ["life"],
+      "tags": [
+        "life"
+      ],
       "created_at": "2026-03-03T20:30:00+08:00"
     }
   ]
