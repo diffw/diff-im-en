@@ -1,6 +1,8 @@
-name: Telegram Auto Publish
+name: Publish and Deploy
 
 on:
+  push:
+    branches: ["main"]
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
@@ -11,8 +13,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: telegram-auto-publish
-  cancel-in-progress: false
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   publish:
@@ -37,21 +39,15 @@ jobs:
           TELEGRAM_ALLOWED_CHAT_ID: ${{ secrets.TELEGRAM_ALLOWED_CHAT_ID }}
         run: node scripts/telegram-to-posts.mjs
 
-      - name: Detect content changes
-        id: detect_changes
+      - name: Commit and push Telegram changes
         run: |
           if [ -z "$(git status --porcelain _data/posts.json .bot-state/telegram-offset.json)" ]; then
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No new Telegram posts."
           else
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            git add _data/posts.json .bot-state/telegram-offset.json
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Auto publish posts from Telegram"
+            git push origin HEAD:main
           fi
-
-      - name: Commit and push changes
-        if: steps.detect_changes.outputs.has_changes == 'true'
-        run: |
-          git add _data/posts.json .bot-state/telegram-offset.json
-          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Auto publish posts from Telegram"
-          git push origin HEAD:main
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
