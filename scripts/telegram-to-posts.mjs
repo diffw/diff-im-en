@@ -7,6 +7,7 @@ import {
   ensureUniqueSlug,
   parseTelegramPostText
 } from "./telegram-parser.js";
+import { sendPublishSuccessReply } from "./telegram-reply.js";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const postsPath = path.join(rootDir, "_data", "posts.json");
@@ -79,6 +80,7 @@ async function main() {
   const existingSlugs = getAllExistingSlugs(postsByDate);
   let highestUpdateId = Number(state.lastUpdateId || 0);
   let publishedCount = 0;
+  const acknowledgements = [];
 
   for (const update of updates) {
     highestUpdateId = Math.max(highestUpdateId, Number(update.update_id || 0));
@@ -98,10 +100,22 @@ async function main() {
 
     appendPost(postsByDate, post);
     publishedCount += 1;
+    acknowledgements.push({
+      chatId: message.chat.id,
+      replyToMessageId: message.message_id,
+      post
+    });
   }
 
   await writeJson(postsPath, postsByDate);
   await writeJson(statePath, { lastUpdateId: highestUpdateId });
+  for (const ack of acknowledgements) {
+    try {
+      await sendPublishSuccessReply(fetch, botToken, ack);
+    } catch (error) {
+      console.error(`Failed to send Telegram acknowledgement for ${ack.post.slug}:`, error);
+    }
+  }
 
   console.log(`Published ${publishedCount} post(s).`);
 }

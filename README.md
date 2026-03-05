@@ -80,3 +80,4 @@ Rules:
 - Runs every 5 minutes (and supports manual dispatch).
 - Reads Telegram updates, appends new entries into `_data/posts.json`.
 - Commits updates automatically to `main`, which triggers Pages deployment.
+- After a post is successfully written, the bot replies to that Telegram message with a success confirmation.
