@@ -4,17 +4,17 @@ import { initBlog } from "../assets/js/main.js";
 describe("initBlog", () => {
   it("renders timeline and reacts to tag filter", () => {
     document.body.innerHTML = `
-      <select id="tag-filter"><option value="all">全部</option></select>
+      <select id="tag-filter"><option value="all">All</option></select>
       <section id="timeline"></section>
-      <button id="prev-page" type="button">上一页</button>
+      <button id="prev-page" type="button">Previous</button>
       <span id="page-indicator"></span>
-      <button id="next-page" type="button">下一页</button>
+      <button id="next-page" type="button">Next</button>
     `;
 
     const rawPosts = {
       "2026-03-04": [
-        { slug: "a", title: "A", content: "A1", tags: ["生活"], created_at: "2026-03-04T09:10:00+08:00" },
-        { slug: "b", title: "B", content: "B1", tags: ["技术"], created_at: "2026-03-04T10:10:00+08:00" }
+        { slug: "a", title: "A", content: "A1", tags: ["life"], created_at: "2026-03-04T09:10:00+08:00" },
+        { slug: "b", title: "B", content: "B1", tags: ["tech"], created_at: "2026-03-04T10:10:00+08:00" }
       ]
     };
 
@@ -22,7 +22,7 @@ describe("initBlog", () => {
     expect(document.querySelectorAll(".post").length).toBe(2);
 
     const tagFilter = document.querySelector("#tag-filter");
-    tagFilter.value = "生活";
+    tagFilter.value = "life";
     tagFilter.dispatchEvent(new Event("change"));
 
     expect(document.querySelectorAll(".post").length).toBe(1);

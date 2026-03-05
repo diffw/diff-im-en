@@ -36,7 +36,7 @@ export function initBlog(doc, rawPosts, config = {}) {
       article.innerHTML = `
         <h2>${title}</h2>
         <div class="post-meta">
-          <time datetime="${post.created_at}">${new Date(post.created_at).toLocaleString("zh-CN")}</time>
+          <time datetime="${post.created_at}">${new Date(post.created_at).toLocaleString("en-US")}</time>
           <span>${tags}</span>
         </div>
         <p class="post-content">${post.content}</p>
@@ -44,7 +44,7 @@ export function initBlog(doc, rawPosts, config = {}) {
       timeline.appendChild(article);
     }
 
-    pageIndicator.textContent = `第 ${state.page} / ${paged.totalPages} 页`;
+    pageIndicator.textContent = `Page ${state.page} / ${paged.totalPages}`;
     prevButton.disabled = state.page <= 1;
     nextButton.disabled = state.page >= paged.totalPages;
   };

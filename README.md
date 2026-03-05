@@ -1,47 +1,47 @@
 # Jelly2 Blog (Jekyll + JSON)
 
-这是一个基于 Jekyll 的短内容博客模板：内容统一放在一个 JSON 文件，支持时间流、标签筛选、分页、RSS、深色模式，并通过 GitHub Actions 部署到 GitHub Pages。
+This is a short-form blog template built with Jekyll. All posts are stored in one JSON file, with timeline rendering, tag filtering, pagination, RSS, dark mode, and deployment through GitHub Actions to GitHub Pages.
 
-## 目录说明
+## Project Structure
 
-- `_data/posts.json`: 唯一内容源（按日期嵌套）
-- `index.html`: 首页时间流
-- `feed.xml`: RSS 输出
-- `assets/js/`: 前端筛选和分页逻辑
-- `.github/workflows/deploy.yml`: 自动部署到 Pages
+- `_data/posts.json`: single content source (nested by date)
+- `index.html`: homepage timeline
+- `feed.xml`: RSS output
+- `assets/js/`: frontend filtering and pagination logic
+- `.github/workflows/deploy.yml`: automatic Pages deployment
 
-## 本地运行
+## Run Locally
 
 ```bash
 bundle install
 bundle exec jekyll serve
 ```
 
-## 测试
+## Test
 
 ```bash
 npm install
 npx vitest run
 ```
 
-## 内容格式（`_data/posts.json`）
+## Content Format (`_data/posts.json`)
 
 ```json
 {
   "2026-03-04": [
     {
       "slug": "unique-id",
-      "title": "标题（可选）",
-      "content": "正文",
-      "tags": ["标签1", "标签2"],
+      "title": "Optional title",
+      "content": "Post content",
+      "tags": ["tag1", "tag2"],
       "created_at": "2026-03-04T09:10:00+08:00"
     }
   ]
 }
 ```
 
-## 发布到 GitHub Pages
+## Publish to GitHub Pages
 
-1. 把 `_config.yml` 中 `url` 改成你的域名（例如 `https://<用户名>.github.io`）。
-2. 推送到 GitHub 仓库 `main` 分支。
-3. 在仓库 `Settings -> Pages` 中将 Source 设为 `GitHub Actions`。
+1. Update `url` in `_config.yml` to your domain (for example `https://<username>.github.io`).
+2. Push to the `main` branch of your GitHub repository.
+3. In repository `Settings -> Pages`, set Source to `GitHub Actions`.

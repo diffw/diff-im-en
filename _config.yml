@@ -2,7 +2,7 @@ title: Jelly2 Blog
 description: Short posts from one JSON file
 url: "https://diffw.github.io"
 baseurl: "/diff-im-en"
-lang: zh-CN
+lang: en
 timezone: Asia/Shanghai
 
 markdown: kramdown
