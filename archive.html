@@ -1,0 +1,59 @@
+---
+layout: null
+permalink: /archive/
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ site.title }} Archive</title>
+    <meta name="description" content="Yearly archive of posts" />
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }} RSS" href="{{ '/feed.xml' | relative_url }}" />
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="page-header">
+        <h1>Archive</h1>
+        <nav class="header-nav" aria-label="Primary">
+          <a href="{{ '/' | relative_url }}">Home</a>
+          <a href="{{ '/archive/' | relative_url }}" aria-current="page">Archive</a>
+        </nav>
+      </header>
+
+      <section class="archive-list">
+        {% assign day_entries = site.data.posts | sort | reverse %}
+        {% assign current_year = "" %}
+
+        {% for day in day_entries %}
+          {% assign year = day[0] | slice: 0, 4 %}
+          {% if year != current_year %}
+            {% assign current_year = year %}
+            <h2 class="archive-year">{{ current_year }}</h2>
+          {% endif %}
+
+          {% for post in day[1] %}
+            <article class="archive-item">
+              <a class="archive-link" href="{{ '/' | relative_url }}#{{ post.slug }}">
+                {% if post.title and post.title != "" %}
+                  {{ post.title }}
+                {% else %}
+                  {{ post.content | strip_html | truncate: 80 }}
+                {% endif %}
+              </a>
+              <div class="archive-meta">
+                <time datetime="{{ post.created_at }}">{{ post.created_at | date: "%Y-%m-%d %H:%M" }}</time>
+                {% if post.tags and post.tags.size > 0 %}
+                  {% for tag in post.tags %}
+                    <a class="tag tag-link" href="{{ '/' | relative_url }}?tag={{ tag | uri_escape }}">#{{ tag }}</a>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        {% endfor %}
+      </section>
+    </main>
+  </body>
+</html>
