@@ -123,4 +123,12 @@ describe("initBlog", () => {
     expect(document.querySelectorAll(".post").length).toBe(1);
     expect(document.querySelector("#page-indicator").textContent).toContain("Page 2 / 2");
   });
+
+  it("hides pagination completely when there is no content", () => {
+    mountBaseDom();
+    initBlog(document, {});
+
+    expect(document.querySelector("#pagination").hidden).toBe(true);
+    expect(document.querySelectorAll(".post").length).toBe(0);
+  });
 });

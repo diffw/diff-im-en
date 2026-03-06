@@ -159,17 +159,20 @@ export function initBlog(doc, rawPosts) {
       }
     }
 
+    timeline.innerHTML = "";
+    if (filteredPosts.length === 0) {
+      if (pagination) {
+        pagination.hidden = true;
+      }
+      timeline.innerHTML = `<p class="empty-state">No posts under #${escapeHtml(state.tag)}.</p>`;
+      return;
+    }
+
     if (pagination && prevButton && nextButton && pageIndicator) {
       pagination.hidden = paged.totalPages <= 1;
       prevButton.disabled = state.page <= 1;
       nextButton.disabled = state.page >= paged.totalPages;
       pageIndicator.textContent = `Page ${state.page} / ${paged.totalPages}`;
-    }
-
-    timeline.innerHTML = "";
-    if (filteredPosts.length === 0) {
-      timeline.innerHTML = `<p class="empty-state">No posts under #${escapeHtml(state.tag)}.</p>`;
-      return;
     }
 
     for (const post of paged.items) {
