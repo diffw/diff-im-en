@@ -100,11 +100,11 @@ describe("initBlog", () => {
     expect(document.querySelector("#tag-summary").hidden).toBe(true);
   });
 
-  it("paginates posts with 30 items per page", () => {
+  it("paginates posts with 10 items per page", () => {
     mountBaseDom();
 
     const posts = [];
-    for (let i = 1; i <= 31; i += 1) {
+    for (let i = 1; i <= 11; i += 1) {
       posts.push({
         slug: `p${i}`,
         title: "",
@@ -116,7 +116,7 @@ describe("initBlog", () => {
 
     initBlog(document, { "2026-03-06": posts });
 
-    expect(document.querySelectorAll(".post").length).toBe(30);
+    expect(document.querySelectorAll(".post").length).toBe(10);
     expect(document.querySelector("#pagination").hidden).toBe(false);
     expect(document.querySelector("#page-indicator").textContent).toContain("Page 1 / 2");
 

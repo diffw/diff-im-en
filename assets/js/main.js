@@ -18,7 +18,7 @@ function formatContentWithLinks(content) {
   return linked.replaceAll("\n", "<br>");
 }
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 10;
 
 function getInitialTag(doc) {
   const location = doc.defaultView?.location;
@@ -76,6 +76,18 @@ function shouldShowReadMore(content) {
   const text = String(content || "");
   const lineCount = text.split(/\r?\n/).length;
   return lineCount > 6 || text.length > 360;
+}
+
+function isPreviewTruncated(previewElement, content) {
+  if (!previewElement) {
+    return false;
+  }
+
+  if (previewElement.scrollHeight > 0 || previewElement.clientHeight > 0) {
+    return previewElement.scrollHeight - previewElement.clientHeight > 1;
+  }
+
+  return shouldShowReadMore(content);
 }
 
 export function initBlog(doc, rawPosts) {
@@ -143,10 +155,7 @@ export function initBlog(doc, rawPosts) {
       const tagsHtml = tags ? `<span>${tags}</span>` : "";
       const formattedContent = formatContentWithLinks(post.content || "");
       const formattedDate = new Date(post.created_at).toLocaleString("en-US");
-      const readMore = shouldShowReadMore(post.content || "");
-      const readMoreHtml = readMore
-        ? `<p class="post-more"><span class="content-ellipsis">...</span> <a class="read-more-link" href="${detailUrl}">Read More</a></p>`
-        : "";
+      const readMoreHtml = `<p class="post-more" hidden><span class="content-ellipsis">...</span> <a class="read-more-link" href="${detailUrl}">Read More</a></p>`;
 
       article.innerHTML = `
         ${titleHtml}
@@ -160,6 +169,12 @@ export function initBlog(doc, rawPosts) {
         </div>
       `;
       timeline.appendChild(article);
+
+      const previewElement = article.querySelector(".post-content-preview");
+      const readMoreElement = article.querySelector(".post-more");
+      if (readMoreElement && isPreviewTruncated(previewElement, post.content || "")) {
+        readMoreElement.hidden = false;
+      }
     }
   };
 
