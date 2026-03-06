@@ -2,13 +2,9 @@ import { describe, expect, it } from "vitest";
 import { initBlog } from "../assets/js/main.js";
 
 describe("initBlog", () => {
-  it("renders timeline and reacts to tag filter", () => {
+  it("renders posts as title, content, then meta", () => {
     document.body.innerHTML = `
-      <select id="tag-filter"><option value="all">All</option></select>
       <section id="timeline"></section>
-      <button id="prev-page" type="button">Previous</button>
-      <span id="page-indicator"></span>
-      <button id="next-page" type="button">Next</button>
     `;
 
     const rawPosts = {
@@ -18,27 +14,20 @@ describe("initBlog", () => {
       ]
     };
 
-    initBlog(document, rawPosts, { pageSize: 10 });
+    initBlog(document, rawPosts);
     expect(document.querySelectorAll(".post").length).toBe(2);
     expect(document.querySelectorAll(".post h2").length).toBe(1);
     expect(document.querySelector("#b h2")).toBeNull();
     expect(document.querySelectorAll("#b .tag").length).toBe(1);
 
-    const tagFilter = document.querySelector("#tag-filter");
-    tagFilter.value = "life";
-    tagFilter.dispatchEvent(new Event("change"));
-
-    expect(document.querySelectorAll(".post").length).toBe(1);
-    expect(document.querySelector(".post").id).toBe("a");
+    const article = document.querySelector("#a");
+    expect(article.lastElementChild.classList.contains("post-meta")).toBe(true);
+    expect(article.querySelector(".post-content").textContent).toContain("A1");
   });
 
   it("hides tags when missing and linkifies content URLs", () => {
     document.body.innerHTML = `
-      <select id="tag-filter"><option value="all">All</option></select>
       <section id="timeline"></section>
-      <button id="prev-page" type="button">Previous</button>
-      <span id="page-indicator"></span>
-      <button id="next-page" type="button">Next</button>
     `;
 
     const rawPosts = {
@@ -53,7 +42,7 @@ describe("initBlog", () => {
       ]
     };
 
-    initBlog(document, rawPosts, { pageSize: 10 });
+    initBlog(document, rawPosts);
     expect(document.querySelectorAll(".tag").length).toBe(0);
 
     const link = document.querySelector("#c .post-content a");
