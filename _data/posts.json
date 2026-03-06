@@ -181,6 +181,15 @@
   ],
   "2026-03-06": [
     {
+      "slug": "20260306010934-post",
+      "title": "",
+      "content": "Nice job.",
+      "tags": [
+        "test"
+      ],
+      "created_at": "2026-03-06T01:09:34.000Z"
+    },
+    {
       "slug": "20260306004645-post",
       "title": "",
       "content": "嘻嘻呀呀 www.diff.im",
