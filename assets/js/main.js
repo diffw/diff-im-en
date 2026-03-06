@@ -151,7 +151,6 @@ export function initBlog(doc, rawPosts) {
         tagSummary.hidden = false;
         tagSummary.innerHTML = `
           Showing posts tagged <strong>#${escapeHtml(state.tag)}</strong> (${filteredPosts.length})
-          <button type="button" class="clear-tag-filter">Clear</button>
           <a class="back-link inline-back-link" href="${escapeHtml(backHref)}">Back</a>
         `;
       } else {
@@ -225,18 +224,6 @@ export function initBlog(doc, rawPosts) {
     state.page = 1;
     render();
   });
-
-  if (tagSummary) {
-    tagSummary.addEventListener("click", (event) => {
-      const clearButton = event.target.closest(".clear-tag-filter");
-      if (!clearButton) {
-        return;
-      }
-      state.tag = "";
-      state.page = 1;
-      render();
-    });
-  }
 
   if (prevButton) {
     prevButton.addEventListener("click", () => {

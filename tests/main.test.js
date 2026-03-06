@@ -95,12 +95,7 @@ describe("initBlog", () => {
     expect(document.querySelector("#tag-summary").hidden).toBe(false);
     expect(document.querySelector("#tag-summary").textContent).toContain("#now");
     expect(document.querySelector(".inline-back-link").getAttribute("href")).toBe("/post/?slug=p9");
-
-    const clearButton = document.querySelector(".clear-tag-filter");
-    clearButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-
-    expect(document.querySelectorAll(".post").length).toBe(2);
-    expect(document.querySelector("#tag-summary").hidden).toBe(true);
+    expect(document.querySelector(".clear-tag-filter")).toBeNull();
   });
 
   it("paginates posts with 10 items per page", () => {
