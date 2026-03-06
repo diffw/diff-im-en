@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { initBlog } from "../assets/js/main.js";
 
 function mountBaseDom() {
+  window.history.replaceState({}, "", "/");
   document.body.innerHTML = `
     <p id="tag-summary" hidden></p>
     <section id="timeline"></section>
@@ -62,6 +63,7 @@ describe("initBlog", () => {
 
   it("filters posts by clicked tag and can clear filter", () => {
     mountBaseDom();
+    window.history.replaceState({}, "", "/?from=%2Fpost%2F%3Fslug%3Dp9");
 
     const rawPosts = {
       "2026-03-06": [
@@ -92,6 +94,7 @@ describe("initBlog", () => {
     expect(document.querySelector(".post").id).toBe("p1");
     expect(document.querySelector("#tag-summary").hidden).toBe(false);
     expect(document.querySelector("#tag-summary").textContent).toContain("#now");
+    expect(document.querySelector(".inline-back-link").getAttribute("href")).toBe("/post/?slug=p9");
 
     const clearButton = document.querySelector(".clear-tag-filter");
     clearButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));

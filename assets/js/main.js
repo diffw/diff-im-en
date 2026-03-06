@@ -41,6 +41,37 @@ function getInitialPage(doc) {
   return Number.isFinite(value) && value > 0 ? value : 1;
 }
 
+function getSafeRelativePath(doc, rawPath, fallbackPath) {
+  if (!rawPath) {
+    return fallbackPath;
+  }
+
+  try {
+    const win = doc.defaultView;
+    if (!win?.location?.origin) {
+      return fallbackPath;
+    }
+
+    const parsed = new URL(rawPath, win.location.origin);
+    if (parsed.origin !== win.location.origin) {
+      return fallbackPath;
+    }
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return fallbackPath;
+  }
+}
+
+function getInitialFrom(doc, fallbackPath) {
+  const location = doc.defaultView?.location;
+  if (!location) {
+    return "";
+  }
+
+  const rawFrom = new URLSearchParams(location.search).get("from");
+  return getSafeRelativePath(doc, rawFrom, fallbackPath);
+}
+
 function setStateInUrl(doc, tag, page) {
   const win = doc.defaultView;
   if (!win?.history?.replaceState || !win.location) {
@@ -104,6 +135,8 @@ export function initBlog(doc, rawPosts) {
   const allPosts = normalizePosts(rawPosts);
   const state = { tag: getInitialTag(doc), page: getInitialPage(doc) };
   const postDetailPath = doc.defaultView?.BLOG_POST_DETAIL_PATH || "/post/";
+  const homePath = doc.defaultView?.BLOG_HOME_PATH || "/";
+  state.from = getInitialFrom(doc, homePath);
 
   const render = () => {
     const filteredPosts = filterPostsByTag(allPosts, state.tag);
@@ -114,10 +147,12 @@ export function initBlog(doc, rawPosts) {
 
     if (tagSummary) {
       if (state.tag) {
+        const backHref = getSafeRelativePath(doc, state.from, homePath);
         tagSummary.hidden = false;
         tagSummary.innerHTML = `
           Showing posts tagged <strong>#${escapeHtml(state.tag)}</strong> (${filteredPosts.length})
           <button type="button" class="clear-tag-filter">Clear</button>
+          <a class="back-link inline-back-link" href="${escapeHtml(backHref)}">Back</a>
         `;
       } else {
         tagSummary.hidden = true;
@@ -142,7 +177,9 @@ export function initBlog(doc, rawPosts) {
       const article = doc.createElement("article");
       article.className = "post";
       article.id = post.slug;
-      const detailUrl = `${postDetailPath}?slug=${encodeURIComponent(post.slug)}`;
+      const location = doc.defaultView?.location;
+      const currentPath = location ? `${location.pathname}${location.search}${location.hash}` : homePath;
+      const detailUrl = `${postDetailPath}?slug=${encodeURIComponent(post.slug)}&from=${encodeURIComponent(currentPath)}`;
 
       const hasTitle = post.title && post.title.trim() !== "";
       const tags = (post.tags || [])
@@ -155,7 +192,7 @@ export function initBlog(doc, rawPosts) {
       const tagsHtml = tags ? `<span>${tags}</span>` : "";
       const formattedContent = formatContentWithLinks(post.content || "");
       const formattedDate = new Date(post.created_at).toLocaleString("en-US");
-      const readMoreHtml = `<p class="post-more" hidden><span class="content-ellipsis">...</span> <a class="read-more-link" href="${detailUrl}">Read More</a></p>`;
+      const readMoreHtml = `<p class="post-more" hidden><a class="read-more-link" href="${detailUrl}">Read More</a></p>`;
 
       article.innerHTML = `
         ${titleHtml}

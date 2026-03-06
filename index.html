@@ -14,7 +14,7 @@ layout: null
   <body>
     <main class="container">
       <header class="page-header">
-        <h1>{{ site.title }}</h1>
+        <h1><a class="brand-link" href="https://diff.im" target="_blank" rel="noopener noreferrer">{{ site.title }}</a></h1>
         <nav class="header-nav" aria-label="Primary">
           <a href="{{ '/' | relative_url }}" aria-current="page">Home</a>
           <a href="{{ '/archive/' | relative_url }}">Archive</a>
@@ -33,6 +33,7 @@ layout: null
     <script>
       window.BLOG_POSTS = {{ site.data.posts | jsonify }};
       window.BLOG_POST_DETAIL_PATH = "{{ '/post/' | relative_url }}";
+      window.BLOG_HOME_PATH = "{{ '/' | relative_url }}";
     </script>
     <script type="module" src="{{ '/assets/js/main.js' | relative_url }}"></script>
   </body>

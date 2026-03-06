@@ -27,8 +27,39 @@ function getSlug(doc) {
   return new URLSearchParams(location.search).get("slug") || "";
 }
 
+function getFrom(doc) {
+  const location = doc.defaultView?.location;
+  if (!location) {
+    return "";
+  }
+
+  return new URLSearchParams(location.search).get("from") || "";
+}
+
+function getSafeRelativePath(doc, rawPath, fallbackPath) {
+  if (!rawPath) {
+    return fallbackPath;
+  }
+
+  try {
+    const win = doc.defaultView;
+    if (!win?.location?.origin) {
+      return fallbackPath;
+    }
+
+    const parsed = new URL(rawPath, win.location.origin);
+    if (parsed.origin !== win.location.origin) {
+      return fallbackPath;
+    }
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return fallbackPath;
+  }
+}
+
 export function initPostPage(doc, rawPosts) {
   const detail = doc.querySelector("#post-detail");
+  const backLink = doc.querySelector("#back-link");
   if (!detail) {
     return;
   }
@@ -48,10 +79,19 @@ export function initPostPage(doc, rawPosts) {
   }
 
   const homePath = doc.defaultView?.BLOG_HOME_PATH || "/";
+  const fromPath = getSafeRelativePath(doc, getFrom(doc), homePath);
+  if (backLink) {
+    backLink.setAttribute("href", fromPath);
+  }
   const hasTitle = post.title && post.title.trim() !== "";
   const titleHtml = hasTitle ? `<h2>${escapeHtml(post.title)}</h2>` : "";
+  const location = doc.defaultView?.location;
+  const currentPath = location ? `${location.pathname}${location.search}${location.hash}` : "/post/";
   const tags = (post.tags || [])
-    .map((tag) => `<a class="tag tag-link" href="${homePath}?tag=${encodeURIComponent(tag)}">#${escapeHtml(tag)}</a>`)
+    .map(
+      (tag) =>
+        `<a class="tag tag-link" href="${homePath}?tag=${encodeURIComponent(tag)}&from=${encodeURIComponent(currentPath)}">#${escapeHtml(tag)}</a>`
+    )
     .join(" ");
   const tagsHtml = tags ? `<span>${tags}</span>` : "";
   const formattedDate = new Date(post.created_at).toLocaleString("en-US");

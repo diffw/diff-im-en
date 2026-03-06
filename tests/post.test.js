@@ -3,8 +3,11 @@ import { initPostPage } from "../assets/js/post.js";
 
 describe("initPostPage", () => {
   it("renders detail post by slug", () => {
-    window.history.replaceState({}, "", "/post/?slug=a");
-    document.body.innerHTML = `<section id="post-detail"></section>`;
+    window.history.replaceState({}, "", "/post/?slug=a&from=%2F%3Ftag%3Dlife");
+    document.body.innerHTML = `
+      <a id="back-link" href="/">Back</a>
+      <section id="post-detail"></section>
+    `;
     window.BLOG_HOME_PATH = "/";
 
     const rawPosts = {
@@ -23,7 +26,9 @@ describe("initPostPage", () => {
 
     expect(document.querySelector("#post-detail .post")).not.toBeNull();
     expect(document.querySelector("#post-detail h2").textContent).toBe("Hello");
-    expect(document.querySelector("#post-detail .tag-link").getAttribute("href")).toContain("/?tag=life");
+    expect(document.querySelector("#back-link").getAttribute("href")).toBe("/?tag=life");
+    const tagHref = document.querySelector("#post-detail .tag-link").getAttribute("href");
+    expect(tagHref).toContain("/?tag=life&from=");
   });
 
   it("shows empty state when slug is missing", () => {
