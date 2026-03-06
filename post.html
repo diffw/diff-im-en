@@ -13,16 +13,8 @@ permalink: /post/
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
   </head>
   <body>
-    <main class="container">
-      <header class="page-header">
-        <h1><a class="brand-link" href="https://en.diff.im">{{ site.title }}</a></h1>
-        <nav class="header-nav" aria-label="Primary">
-          <a href="{{ '/' | relative_url }}">Home</a>
-          <a href="{{ '/archive/' | relative_url }}">Archive</a>
-        </nav>
-      </header>
-
-      <p class="back-row"><a id="back-link" class="back-link" href="{{ '/' | relative_url }}">Back</a></p>
+    <main class="container post-page-container">
+      <p class="back-row"><a id="back-link" class="back-link back-link-prominent" href="{{ '/' | relative_url }}">Back</a></p>
       <section id="post-detail" aria-live="polite"></section>
     </main>
 
