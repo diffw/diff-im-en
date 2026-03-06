@@ -1,4 +1,4 @@
-import { normalizePosts } from "./blog-core.js";
+import { normalizePosts, paginatePosts } from "./blog-core.js";
 
 function escapeHtml(input) {
   return input
@@ -18,6 +18,8 @@ function formatContentWithLinks(content) {
   return linked.replaceAll("\n", "<br>");
 }
 
+const PAGE_SIZE = 30;
+
 function getInitialTag(doc) {
   const location = doc.defaultView?.location;
   if (!location) {
@@ -28,7 +30,18 @@ function getInitialTag(doc) {
   return value ? value.trim() : "";
 }
 
-function setTagInUrl(doc, tag) {
+function getInitialPage(doc) {
+  const location = doc.defaultView?.location;
+  if (!location) {
+    return 1;
+  }
+
+  const rawValue = new URLSearchParams(location.search).get("page");
+  const value = Number.parseInt(rawValue || "1", 10);
+  return Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+function setStateInUrl(doc, tag, page) {
   const win = doc.defaultView;
   if (!win?.history?.replaceState || !win.location) {
     return;
@@ -39,6 +52,11 @@ function setTagInUrl(doc, tag) {
     url.searchParams.set("tag", tag);
   } else {
     url.searchParams.delete("tag");
+  }
+  if (page > 1) {
+    url.searchParams.set("page", String(page));
+  } else {
+    url.searchParams.delete("page");
   }
   win.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
 }
@@ -54,24 +72,39 @@ function filterPostsByTag(posts, activeTag) {
   );
 }
 
+function shouldShowReadMore(content) {
+  const text = String(content || "");
+  const lineCount = text.split(/\r?\n/).length;
+  return lineCount > 6 || text.length > 360;
+}
+
 export function initBlog(doc, rawPosts) {
   const timeline = doc.querySelector("#timeline");
   const tagSummary = doc.querySelector("#tag-summary");
+  const prevButton = doc.querySelector("#prev-page");
+  const nextButton = doc.querySelector("#next-page");
+  const pageIndicator = doc.querySelector("#page-indicator");
+  const pagination = doc.querySelector("#pagination");
   if (!timeline) {
     return;
   }
 
   const allPosts = normalizePosts(rawPosts);
-  const state = { tag: getInitialTag(doc) };
+  const state = { tag: getInitialTag(doc), page: getInitialPage(doc) };
+  const postDetailPath = doc.defaultView?.BLOG_POST_DETAIL_PATH || "/post/";
 
   const render = () => {
-    const visiblePosts = filterPostsByTag(allPosts, state.tag);
+    const filteredPosts = filterPostsByTag(allPosts, state.tag);
+    const paged = paginatePosts(filteredPosts, state.page, PAGE_SIZE);
+    state.page = paged.page;
+
+    setStateInUrl(doc, state.tag, state.page);
 
     if (tagSummary) {
       if (state.tag) {
         tagSummary.hidden = false;
         tagSummary.innerHTML = `
-          Showing posts tagged <strong>#${escapeHtml(state.tag)}</strong> (${visiblePosts.length})
+          Showing posts tagged <strong>#${escapeHtml(state.tag)}</strong> (${filteredPosts.length})
           <button type="button" class="clear-tag-filter">Clear</button>
         `;
       } else {
@@ -80,16 +113,24 @@ export function initBlog(doc, rawPosts) {
       }
     }
 
+    if (pagination && prevButton && nextButton && pageIndicator) {
+      pagination.hidden = paged.totalPages <= 1;
+      prevButton.disabled = state.page <= 1;
+      nextButton.disabled = state.page >= paged.totalPages;
+      pageIndicator.textContent = `Page ${state.page} / ${paged.totalPages}`;
+    }
+
     timeline.innerHTML = "";
-    if (visiblePosts.length === 0) {
+    if (filteredPosts.length === 0) {
       timeline.innerHTML = `<p class="empty-state">No posts under #${escapeHtml(state.tag)}.</p>`;
       return;
     }
 
-    for (const post of visiblePosts) {
+    for (const post of paged.items) {
       const article = doc.createElement("article");
       article.className = "post";
       article.id = post.slug;
+      const detailUrl = `${postDetailPath}?slug=${encodeURIComponent(post.slug)}`;
 
       const hasTitle = post.title && post.title.trim() !== "";
       const tags = (post.tags || [])
@@ -102,12 +143,19 @@ export function initBlog(doc, rawPosts) {
       const tagsHtml = tags ? `<span>${tags}</span>` : "";
       const formattedContent = formatContentWithLinks(post.content || "");
       const formattedDate = new Date(post.created_at).toLocaleString("en-US");
+      const readMore = shouldShowReadMore(post.content || "");
+      const readMoreHtml = readMore
+        ? `<p class="post-more"><span class="content-ellipsis">...</span> <a class="read-more-link" href="${detailUrl}">Read More</a></p>`
+        : "";
 
       article.innerHTML = `
         ${titleHtml}
-        <p class="post-content">${formattedContent}</p>
+        <p class="post-content post-content-preview">${formattedContent}</p>
+        ${readMoreHtml}
         <div class="post-meta">
-          <time datetime="${post.created_at}">${formattedDate}</time>
+          <a class="post-time-link" href="${detailUrl}">
+            <time datetime="${post.created_at}">${formattedDate}</time>
+          </a>
           ${tagsHtml}
         </div>
       `;
@@ -122,7 +170,7 @@ export function initBlog(doc, rawPosts) {
     }
     const rawTag = target.getAttribute("data-tag") || "";
     state.tag = decodeURIComponent(rawTag);
-    setTagInUrl(doc, state.tag);
+    state.page = 1;
     render();
   });
 
@@ -133,7 +181,23 @@ export function initBlog(doc, rawPosts) {
         return;
       }
       state.tag = "";
-      setTagInUrl(doc, "");
+      state.page = 1;
+      render();
+    });
+  }
+
+  if (prevButton) {
+    prevButton.addEventListener("click", () => {
+      if (state.page > 1) {
+        state.page -= 1;
+        render();
+      }
+    });
+  }
+
+  if (nextButton) {
+    nextButton.addEventListener("click", () => {
+      state.page += 1;
       render();
     });
   }

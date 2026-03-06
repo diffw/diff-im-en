@@ -16,34 +16,35 @@ function parseTelegramPostText(text) {
   if (!text || typeof text !== "string") return null;
 
   const lines = text.split("\n");
-  let cursor = 0;
-  while (cursor < lines.length && lines[cursor].trim().length === 0) cursor++;
-  if (cursor >= lines.length) return null;
-
   const isTagLine = (line) =>
-    /^\s*(#([\p{L}\p{N}_-]+))(\s*,\s*#([\p{L}\p{N}_-]+))*\s*$/u.test(line);
+    /^\s*(#([\p{L}\p{N}_-]+))(?:[\s,]+#([\p{L}\p{N}_-]+))*\s*$/u.test(line);
 
   let title = "";
-  let tags = [];
+  const tags = [];
+  const contentLines = [];
 
-  if (lines[cursor].trim().startsWith("#") && !isTagLine(lines[cursor].trim())) {
-    title = lines[cursor].trim().replace(/^#+\s*/, "").trim();
-    cursor++;
-    while (cursor < lines.length && lines[cursor].trim().length === 0) cursor++;
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (!title && trimmed.startsWith("#") && !isTagLine(trimmed)) {
+      title = trimmed.replace(/^#+\s*/, "").trim();
+      continue;
+    }
+
+    if (trimmed && isTagLine(trimmed)) {
+      for (const match of trimmed.matchAll(/#([\p{L}\p{N}_-]+)/gu)) {
+        const tag = match[1].toLowerCase();
+        if (!tags.includes(tag)) {
+          tags.push(tag);
+        }
+      }
+      continue;
+    }
+
+    contentLines.push(line);
   }
 
-  if (cursor < lines.length && isTagLine(lines[cursor].trim())) {
-    tags = [
-      ...new Set(
-        [...lines[cursor].matchAll(/#([\p{L}\p{N}_-]+)/gu)].map((m) =>
-          m[1].toLowerCase()
-        )
-      ),
-    ];
-    cursor++;
-  }
-
-  const content = lines.slice(cursor).join("\n").trim();
+  const content = contentLines.join("\n").trim();
   if (!content) return null;
 
   return { title, tags, content };
@@ -137,31 +138,48 @@ export default {
 
     const secretToken = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
     if (env.WEBHOOK_SECRET && secretToken !== env.WEBHOOK_SECRET) {
+      console.log("SKIP: webhook secret mismatch");
       return new Response("Unauthorized", { status: 403 });
     }
 
     try {
       const update = await request.json();
-      const message = update.message;
-      if (!message?.text) return new Response("OK", { status: 200 });
+      console.log("Received update:", JSON.stringify(update).slice(0, 500));
 
-      if (String(message.chat.id) !== env.TELEGRAM_ALLOWED_CHAT_ID) {
+      const message = update.message;
+      if (!message?.text) {
+        console.log("SKIP: no message.text");
+        return new Response("OK", { status: 200 });
+      }
+
+      console.log(`Chat ID: ${message.chat.id} (type: ${typeof message.chat.id}), Allowed: ${env.TELEGRAM_ALLOWED_CHAT_ID}`);
+
+      if (String(message.chat.id) !== String(env.TELEGRAM_ALLOWED_CHAT_ID).trim()) {
+        console.log("SKIP: chat_id mismatch");
         return new Response("OK", { status: 200 });
       }
 
       const parsed = parseTelegramPostText(message.text);
-      if (!parsed) return new Response("OK", { status: 200 });
+      if (!parsed) {
+        console.log("SKIP: parse returned null");
+        return new Response("OK", { status: 200 });
+      }
 
+      console.log("Parsed:", JSON.stringify(parsed));
       const post = buildPost(message, parsed);
+      console.log("Built post:", post.slug);
+
       const added = await updatePostsJson(env, post);
+      console.log("Added to GitHub:", added);
 
       if (added) {
         await sendTelegramReply(env, message.chat.id, message.message_id, post);
+        console.log("Reply sent");
       }
 
       return new Response("OK", { status: 200 });
     } catch (err) {
-      console.error("Worker error:", err);
+      console.error("Worker error:", err.message, err.stack);
       return new Response("Error", { status: 500 });
     }
   },

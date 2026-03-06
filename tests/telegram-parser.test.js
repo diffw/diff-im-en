@@ -43,6 +43,32 @@ Body only`)).toEqual({
     });
   });
 
+  it("parses title/tags/content in any order", () => {
+    expect(parseTelegramPostText(`content first
+# Title later
+#AI #Design`)).toEqual({
+      title: "Title later",
+      tags: ["ai", "design"],
+      content: "content first"
+    });
+
+    expect(parseTelegramPostText(`#AI #Design
+# Title
+content`)).toEqual({
+      title: "Title",
+      tags: ["ai", "design"],
+      content: "content"
+    });
+
+    expect(parseTelegramPostText(`# Title
+content
+#AI, #Design`)).toEqual({
+      title: "Title",
+      tags: ["ai", "design"],
+      content: "content"
+    });
+  });
+
   it("preserves line breaks in content", () => {
     const parsed = parseTelegramPostText("First paragraph\n\nSecond paragraph\nthird line");
     expect(parsed.content).toBe("First paragraph\n\nSecond paragraph\nthird line");

@@ -4,35 +4,35 @@ export function parseTelegramPostText(text) {
   }
 
   const lines = text.split("\n");
-
-  let cursor = 0;
-  while (cursor < lines.length && lines[cursor].trim().length === 0) {
-    cursor++;
-  }
-  if (cursor >= lines.length) {
-    return null;
-  }
-
-  const isTagLine = (line) => /^\s*(#([\p{L}\p{N}_-]+))(\s*,\s*#([\p{L}\p{N}_-]+))*\s*$/u.test(line);
+  const isTagLine = (line) =>
+    /^\s*(#([\p{L}\p{N}_-]+))(?:[\s,]+#([\p{L}\p{N}_-]+))*\s*$/u.test(line);
 
   let title = "";
-  let tags = [];
+  const tags = [];
+  const contentLines = [];
 
-  if (lines[cursor].trim().startsWith("#") && !isTagLine(lines[cursor].trim())) {
-    title = lines[cursor].trim().replace(/^#+\s*/, "").trim();
-    cursor += 1;
-    while (cursor < lines.length && lines[cursor].trim().length === 0) {
-      cursor++;
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (!title && trimmed.startsWith("#") && !isTagLine(trimmed)) {
+      title = trimmed.replace(/^#+\s*/, "").trim();
+      continue;
     }
+
+    if (trimmed && isTagLine(trimmed)) {
+      for (const match of trimmed.matchAll(/#([\p{L}\p{N}_-]+)/gu)) {
+        const tag = match[1].toLowerCase();
+        if (!tags.includes(tag)) {
+          tags.push(tag);
+        }
+      }
+      continue;
+    }
+
+    contentLines.push(line);
   }
 
-  if (cursor < lines.length && isTagLine(lines[cursor].trim())) {
-    const tagMatches = [...lines[cursor].matchAll(/#([\p{L}\p{N}_-]+)/gu)];
-    tags = [...new Set(tagMatches.map((match) => match[1].toLowerCase()))];
-    cursor += 1;
-  }
-
-  const content = lines.slice(cursor).join("\n").trim();
+  const content = contentLines.join("\n").trim();
   if (content.length === 0) {
     return null;
   }

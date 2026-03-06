@@ -23,10 +23,16 @@ layout: null
 
       <p id="tag-summary" class="tag-summary" hidden></p>
       <section id="timeline" class="timeline" aria-live="polite"></section>
+      <nav id="pagination" class="pagination" aria-label="Pagination" hidden>
+        <button id="prev-page" type="button">Previous</button>
+        <span id="page-indicator">Page 1 / 1</span>
+        <button id="next-page" type="button">Next</button>
+      </nav>
     </main>
 
     <script>
       window.BLOG_POSTS = {{ site.data.posts | jsonify }};
+      window.BLOG_POST_DETAIL_PATH = "{{ '/post/' | relative_url }}";
     </script>
     <script type="module" src="{{ '/assets/js/main.js' | relative_url }}"></script>
   </body>

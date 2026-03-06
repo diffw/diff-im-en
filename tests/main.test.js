@@ -1,16 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { initBlog } from "../assets/js/main.js";
 
+function mountBaseDom() {
+  document.body.innerHTML = `
+    <p id="tag-summary" hidden></p>
+    <section id="timeline"></section>
+    <nav id="pagination" hidden>
+      <button id="prev-page" type="button">Previous</button>
+      <span id="page-indicator"></span>
+      <button id="next-page" type="button">Next</button>
+    </nav>
+  `;
+}
+
 describe("initBlog", () => {
-  it("renders posts as title, content, then meta", () => {
-    document.body.innerHTML = `
-      <p id="tag-summary" hidden></p>
-      <section id="timeline"></section>
-    `;
+  it("renders posts as title, content, then meta with clickable time link", () => {
+    mountBaseDom();
 
     const rawPosts = {
       "2026-03-04": [
-        { slug: "a", title: "A", content: "A1", tags: ["life"], created_at: "2026-03-04T09:10:00+08:00" },
+        { slug: "a", title: "A", content: "A1\nA2\nA3\nA4\nA5\nA6\nA7", tags: ["life"], created_at: "2026-03-04T09:10:00+08:00" },
         { slug: "b", title: "", content: "B1", tags: ["tech"], created_at: "2026-03-04T10:10:00+08:00" }
       ]
     };
@@ -24,13 +33,12 @@ describe("initBlog", () => {
     const article = document.querySelector("#a");
     expect(article.lastElementChild.classList.contains("post-meta")).toBe(true);
     expect(article.querySelector(".post-content").textContent).toContain("A1");
+    expect(article.querySelector(".read-more-link")).not.toBeNull();
+    expect(article.querySelector(".post-time-link").getAttribute("href")).toContain("/post/?slug=a");
   });
 
   it("hides tags when missing and linkifies content URLs", () => {
-    document.body.innerHTML = `
-      <p id="tag-summary" hidden></p>
-      <section id="timeline"></section>
-    `;
+    mountBaseDom();
 
     const rawPosts = {
       "2026-03-06": [
@@ -53,10 +61,7 @@ describe("initBlog", () => {
   });
 
   it("filters posts by clicked tag and can clear filter", () => {
-    document.body.innerHTML = `
-      <p id="tag-summary" hidden></p>
-      <section id="timeline"></section>
-    `;
+    mountBaseDom();
 
     const rawPosts = {
       "2026-03-06": [
@@ -93,5 +98,31 @@ describe("initBlog", () => {
 
     expect(document.querySelectorAll(".post").length).toBe(2);
     expect(document.querySelector("#tag-summary").hidden).toBe(true);
+  });
+
+  it("paginates posts with 30 items per page", () => {
+    mountBaseDom();
+
+    const posts = [];
+    for (let i = 1; i <= 31; i += 1) {
+      posts.push({
+        slug: `p${i}`,
+        title: "",
+        content: `Post ${i}`,
+        tags: [],
+        created_at: `2026-03-06T${String(i % 24).padStart(2, "0")}:00:00+08:00`
+      });
+    }
+
+    initBlog(document, { "2026-03-06": posts });
+
+    expect(document.querySelectorAll(".post").length).toBe(30);
+    expect(document.querySelector("#pagination").hidden).toBe(false);
+    expect(document.querySelector("#page-indicator").textContent).toContain("Page 1 / 2");
+
+    document.querySelector("#next-page").dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    expect(document.querySelectorAll(".post").length).toBe(1);
+    expect(document.querySelector("#page-indicator").textContent).toContain("Page 2 / 2");
   });
 });

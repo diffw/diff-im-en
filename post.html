@@ -1,0 +1,34 @@
+---
+layout: null
+permalink: /post/
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ site.title }} Post</title>
+    <meta name="description" content="Post detail" />
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }} RSS" href="{{ '/feed.xml' | relative_url }}" />
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="page-header">
+        <h1>Post</h1>
+        <nav class="header-nav" aria-label="Primary">
+          <a href="{{ '/' | relative_url }}">Home</a>
+          <a href="{{ '/archive/' | relative_url }}">Archive</a>
+        </nav>
+      </header>
+
+      <section id="post-detail" aria-live="polite"></section>
+    </main>
+
+    <script>
+      window.BLOG_POSTS = {{ site.data.posts | jsonify }};
+      window.BLOG_HOME_PATH = "{{ '/' | relative_url }}";
+    </script>
+    <script type="module" src="{{ '/assets/js/post.js' | relative_url }}"></script>
+  </body>
+</html>

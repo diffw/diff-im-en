@@ -35,7 +35,7 @@ permalink: /archive/
 
           {% for post in day[1] %}
             <article class="archive-item">
-              <a class="archive-link" href="{{ '/' | relative_url }}#{{ post.slug }}">
+              <a class="archive-link" href="{{ '/post/' | relative_url }}?slug={{ post.slug | uri_escape }}">
                 {% if post.title and post.title != "" %}
                   {{ post.title }}
                 {% else %}
@@ -43,7 +43,9 @@ permalink: /archive/
                 {% endif %}
               </a>
               <div class="archive-meta">
-                <time datetime="{{ post.created_at }}">{{ post.created_at | date: "%Y-%m-%d %H:%M" }}</time>
+                <a class="post-time-link" href="{{ '/post/' | relative_url }}?slug={{ post.slug | uri_escape }}">
+                  <time datetime="{{ post.created_at }}">{{ post.created_at | date: "%Y-%m-%d %H:%M" }}</time>
+                </a>
                 {% if post.tags and post.tags.size > 0 %}
                   {% for tag in post.tags %}
                     <a class="tag tag-link" href="{{ '/' | relative_url }}?tag={{ tag | uri_escape }}">#{{ tag }}</a>
